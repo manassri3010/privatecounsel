@@ -46,7 +46,19 @@ docker compose up -d
 curl http://localhost:8080/health
 ```
 
-For local development without a GPU, point `LLM_BASE_URL` at [Ollama](https://ollama.com/) (see `.env.example`).
+### Local development (no GPU)
+
+Uses [Ollama](https://ollama.com/) instead of vLLM. Both expose an OpenAI-compatible API, so the code is the same.
+
+```bash
+ollama pull qwen2.5:3b
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r requirements-dev.txt
+cp .env.example .env        # switch to the "API run directly with uvicorn" lines
+uvicorn app.main:app --app-dir api --port 8080
+```
+
+Run the checks CI runs with `ruff check .` and `pytest`.
 
 ## Repository layout
 
