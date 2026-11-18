@@ -1,11 +1,16 @@
 services:
   vllm:
-    image: vllm/vllm-openai:latest
-    command: >
-      --model ${LLM_MODEL}
-      --api-key ${VLLM_API_KEY}
-      --max-model-len 8192
-      --enable-prefix-caching
+    # Pinned for reproducible benchmarks (decision 004). v0.32.0 needs NVIDIA driver >= 580 (CUDA 13.0);
+    # on older drivers set VLLM_TAG=v0.32.0-cu129.
+    image: vllm/vllm-openai:${VLLM_TAG:-v0.32.0}
+    command:
+      - --model=${LLM_MODEL}
+      - --api-key=${VLLM_API_KEY}
+      - --max-model-len=8192
+      - --enable-prefix-caching
+      # Qwen3 "thinks" by default; RAG answers don't need it (decision 003). Requests can still opt in.
+      - --reasoning-parser=qwen3
+      - '--default-chat-template-kwargs={"enable_thinking": false}'
     environment:
       - HF_TOKEN=${HF_TOKEN}
     volumes:
