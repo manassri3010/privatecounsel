@@ -34,9 +34,18 @@ Checked on Hugging Face, 18 Nov 2026.
   - FP8: `Qwen/Qwen3-8B-FP8`
   - AWQ (4-bit): `Qwen/Qwen3-8B-AWQ`
 - **Caveats:**
-  - **Thinking mode:** Qwen3 "thinks" by default. The API must send `enable_thinking: false` for RAG answers. That is faster, and long hidden reasoning isn't what we want for cited answers. This doesn't affect the throughput benchmarks, which use raw prompts.
+  - **Thinking mode:** Qwen3 "thinks" by default. vLLM turns it off server-wide (`--default-chat-template-kwargs '{"enable_thinking": false}'` in `docker-compose.yml`), because long hidden reasoning is slower and isn't what we want for cited answers. A request can still opt in. This doesn't affect the throughput benchmarks, which use raw prompts.
   - **Context:** 32K native context is enough for RAG (about 5 chunks of 800 tokens plus the answer).
 - **Rejected:**
   - **Llama 3.1 8B Instruct:** gated, restrictive licence terms, older, and no official quantizations.
   - **Qwen3.5-9B:** newest and probably the strongest, but it carries a vision encoder we don't need, uses a new hybrid attention design that makes benchmark results harder to compare, and has no official FP8 or AWQ. Re-evaluate in Phase 3 as a quality upgrade.
   - **Qwen2.5-7B-Instruct:** superseded by Qwen3-8B, and has no official FP8.
+
+## 004: Pin vLLM to v0.32.0
+- **Why:**
+  - **Reproducible numbers:** benchmark results are only comparable if the serving engine is the same. `latest` changes every few weeks, and vLLM releases regularly change defaults that move TTFT and throughput (scheduler, CUDA graphs, KV-cache sizing).
+  - **Stability:** v0.32.0 (18 Oct 2026) was the newest full release at least a few weeks old, with no open regressions affecting Qwen3 dense models. v0.34.0 was two days old and v0.33 had only release candidates.
+  - **Recorded:** each benchmark run also records the vLLM version it ran on.
+- **CUDA:** the default image needs NVIDIA driver 580+ (CUDA 13.0). `VLLM_TAG=v0.32.0-cu129` covers older drivers on rented nodes, and the tag is still pinned.
+- **Upgrading:** an upgrade is its own PR, with a re-run of the Phase 1 benchmark to show the difference.
+- **Rejected:** `latest` (results drift without notice); `v0.34.0` (too new to trust for a baseline).
