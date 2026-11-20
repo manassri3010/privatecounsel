@@ -52,6 +52,7 @@ Uses [Ollama](https://ollama.com/) instead of vLLM. Both expose an OpenAI-compat
 
 ```bash
 ollama pull qwen2.5:3b
+brew install tesseract      # OCR for scanned PDFs
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env        # switch to the "API run directly with uvicorn" lines

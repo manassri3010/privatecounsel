@@ -11,6 +11,8 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
+      # Tesseract is a system program, not a Python package; the OCR test needs it.
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
-      - run: pytest -q
+      - run: pytest -q -rs   # -rs lists skipped tests, so a silently skipped OCR test shows up
