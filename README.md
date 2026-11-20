@@ -73,6 +73,16 @@ The list of documents and their licences lives in `corpus/sources.toml`. The scr
 
 Embeddings use `BAAI/bge-base-en-v1.5` (decision 005), downloaded from Hugging Face on first use (about 440 MB) and run locally.
 
+To parse, chunk, embed and store the corpus in PostgreSQL (set `DATABASE_URL` to `localhost` in `.env`, see `.env.example`):
+
+```bash
+docker compose up -d db
+python -m ingestion.ingest                                  # acts and judgments, matter "public-corpus"
+python -m ingestion.ingest --kinds scan --matter ocr-test   # the scanned copies, kept separate
+```
+
+Re-running skips unchanged documents. The storage tests use the same database, each in a temporary schema that is dropped afterwards.
+
 ## Repository layout
 
 | Folder | What's inside |

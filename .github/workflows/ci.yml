@@ -6,6 +6,18 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # Same image as docker-compose.yml, so storage tests run against real PostgreSQL + pgvector.
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: privatecounsel
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: privatecounsel
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://privatecounsel:ci-only@localhost:5432/privatecounsel
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7

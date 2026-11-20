@@ -25,6 +25,8 @@ def passage_text(title, heading, text):
 
 
 class Embedder:
+    name = f"{MODEL_NAME}@{MODEL_REVISION}"  # stored with each document, to spot vectors from another model
+
     def __init__(self, model=None):
         if model is None:
             from sentence_transformers import SentenceTransformer  # slow import; only when really needed
