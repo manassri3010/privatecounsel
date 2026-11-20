@@ -1,9 +1,9 @@
 [tool.pytest.ini_options]
-pythonpath = ["api", "benchmarks", "corpus"]
+pythonpath = [".", "api", "benchmarks", "corpus"]
 testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 110
 
 [tool.ruff.lint.isort]
-known-first-party = ["app"]
+known-first-party = ["app", "ingestion"]
