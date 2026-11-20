@@ -83,12 +83,19 @@ python -m ingestion.ingest --kinds scan --matter ocr-test   # the scanned copies
 
 Re-running skips unchanged documents. The storage tests use the same database, each in a temporary schema that is dropped afterwards.
 
+To see which chunks a question retrieves (vector search; keyword search and reranking come next):
+
+```bash
+python -m retrieval.search "Can the trial court proceed ex parte after the defendant's counsel withdraws?" -k 5
+```
+
 ## Repository layout
 
 | Folder | What's inside |
 | --- | --- |
 | `api/` | FastAPI service: query pipeline, auth, citations |
 | `ingestion/` | Parsing, OCR, chunking, embedding |
+| `retrieval/` | Search over stored chunks, filtered by matter |
 | `corpus/` | List of public test documents and the script that downloads them |
 | `evals/` | Test questions and the scoring script |
 | `benchmarks/` | Inference benchmarks (TTFT, ITL, throughput, cost) |
