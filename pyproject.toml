@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-pythonpath = ["api", "benchmarks"]
+pythonpath = ["api", "benchmarks", "corpus"]
 testpaths = ["tests"]
 
 [tool.ruff]

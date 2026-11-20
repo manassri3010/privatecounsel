@@ -1,0 +1,100 @@
+# Public documents for the development and evaluation corpus (issue #24).
+#
+# corpus/fetch_corpus.py downloads these into data/corpus/ (gitignored) and writes
+# data/corpus/manifest.json with each file's source URL, licence, checksum and page count.
+# Only public legal texts belong here: never client documents.
+
+[licences]
+india-code = """Official text of a Central Act, published by the Legislative Department, Ministry of Law \
+and Justice, on India Code (indiacode.nic.in). India Code publishes no reuse licence, so these files \
+are used locally for development and testing only and are not redistributed."""
+sc-judgments = """CC-BY-4.0. Indian Supreme Court Judgments dataset (Dattam Labs, AWS Open Data Registry: \
+registry.opendata.aws/indian-supreme-court-judgments); original source: Supreme Court of India \
+(scr.sci.gov.in)."""
+
+# --- Bare acts (born-digital PDFs with a text layer) ---------------------------------------------
+
+[[document]]
+id = "indian-contract-act-1872"
+title = "The Indian Contract Act, 1872"
+kind = "act"
+url = "https://www.indiacode.nic.in/bitstream/123456789/2187/2/A187209.pdf"
+licence = "india-code"
+
+[[document]]
+id = "arbitration-and-conciliation-act-1996"
+title = "The Arbitration and Conciliation Act, 1996"
+kind = "act"
+url = "https://www.indiacode.nic.in/bitstream/123456789/1978/1/A199626.pdf"
+licence = "india-code"
+
+[[document]]
+id = "information-technology-amendment-act-2008"
+title = "The Information Technology (Amendment) Act, 2008"
+kind = "act"
+url = "https://www.indiacode.nic.in/bitstream/123456789/15386/1/it_amendment_act2008.pdf"
+licence = "india-code"
+
+# --- Supreme Court judgments ----------------------------------------------------------------------
+
+[[document]]
+id = "sc-2023-dharmin-bai-kashyap-v-babli-sahu"
+title = "Dharmin Bai Kashyap v. Babli Sahu & Others (2023 INSC 712)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/english/2023_11_150_158_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]
+id = "sc-2023-yp-lele-v-msedcl"
+title = "Y. P. Lele v. Maharashtra State Electricity Distribution Company Ltd. & Ors. (2023 INSC 732)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/english/2023_11_141_149_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]
+id = "sc-2023-esic-v-endocrinology-and-immunology-lab"
+title = "E.S.I. Corporation v. M/s. Endocrinology and Immunology Lab (2023 INSC 665)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/english/2023_11_159_166_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]
+id = "sc-2023-balwantbhai-bhandari-v-hiralal-contractor"
+title = "Balwantbhai Somabhai Bhandari v. Hiralal Somabhai Contractor (Deceased) Rep. by LRs. & Ors. (Civil Appeal No. 4955 of 2022)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/english/2023_11_1064_1134_EN.pdf"
+licence = "sc-judgments"
+
+# A real 1950s scan: page images with a hidden OCR text layer added later.
+[[document]]
+id = "sc-1954-sakhawat-ali-v-state-of-orissa"
+title = "Sakhawat Ali v. The State of Orissa ([1955] 1 S.C.R. 1004, 1954 INSC 113)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=1955/english/1955_1_1004_1011_EN.pdf"
+licence = "sc-judgments"
+
+# --- Scanned copies for OCR testing ---------------------------------------------------------------
+# Image-only PDFs made locally from the documents above: each page is rendered to a greyscale image
+# and the text layer is dropped, which is what a law firm's scanner produces. Keeping the original
+# means OCR output can be compared with the true text. pages = [first, last], 1-based, inclusive.
+
+[[scan]]
+id = "scan-indian-contract-act-1872-p1-4"
+from = "indian-contract-act-1872"
+pages = [1, 4]
+dpi = 200
+skew = 0.8   # degrees; real scans are rarely perfectly straight
+
+[[scan]]
+id = "scan-sc-1954-sakhawat-ali-v-state-of-orissa"
+from = "sc-1954-sakhawat-ali-v-state-of-orissa"
+pages = [1, 8]
+dpi = 200
+skew = 0.0   # already a real scan; this copy only removes the hidden OCR layer
+
+[[scan]]
+id = "scan-sc-2023-dharmin-bai-kashyap-low-res-p1-3"
+from = "sc-2023-dharmin-bai-kashyap-v-babli-sahu"
+pages = [1, 3]
+dpi = 100    # deliberately poor quality, to see where OCR starts to fail
+skew = 1.5
