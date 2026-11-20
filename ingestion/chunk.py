@@ -15,8 +15,8 @@ import sys
 from collections import Counter
 from dataclasses import dataclass
 
-# The small and base BGE models read at most 512 tokens. Approximate counts can be off, and the
-# heading may be added before embedding, so stay well below that. Revisited with decision 005.
+# Default for quick inspection with approx_tokens. Ingestion uses embed.CHUNK_TOKENS with the
+# embedding model's own tokenizer instead: the estimate can undercount by over 40% (decision 005).
 MAX_TOKENS = 450
 EDGE_LINES = 4  # how far from the top or bottom of a page a running header or footer can be
 MIN_REPEATS = 3  # an edge line seen on this many pages is a running header or footer

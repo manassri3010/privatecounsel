@@ -13,6 +13,8 @@ jobs:
           python-version: "3.12"
       # Tesseract is a system program, not a Python package; the OCR test needs it.
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends tesseract-ocr
+      # CPU-only PyTorch: the default Linux wheel bundles several GB of CUDA libraries CI doesn't need.
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: pip install -r requirements-dev.txt
       - run: ruff check .
       - run: pytest -q -rs   # -rs lists skipped tests, so a silently skipped OCR test shows up
