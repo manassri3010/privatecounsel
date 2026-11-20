@@ -60,12 +60,23 @@ uvicorn app.main:app --app-dir api --port 8080
 
 Run the checks CI runs with `ruff check .` and `pytest`.
 
+### Test corpus
+
+Development and evals use only public legal texts: bare acts from [India Code](https://www.indiacode.nic.in/) and Supreme Court judgments from the [Indian Supreme Court Judgments](https://registry.opendata.aws/indian-supreme-court-judgments/) open dataset (CC-BY-4.0). No client documents.
+
+```bash
+python corpus/fetch_corpus.py    # downloads into data/corpus/ (gitignored); re-run to fetch anything missing
+```
+
+The list of documents and their licences lives in `corpus/sources.toml`. The script also makes image-only "scanned" copies of a few documents for OCR testing, and writes `data/corpus/manifest.json` with each file's source URL, licence, SHA-256 checksum and page count.
+
 ## Repository layout
 
 | Folder | What's inside |
 | --- | --- |
 | `api/` | FastAPI service: query pipeline, auth, citations |
 | `ingestion/` | Parsing, OCR, chunking, embedding |
+| `corpus/` | List of public test documents and the script that downloads them |
 | `evals/` | Test questions and the scoring script |
 | `benchmarks/` | Inference benchmarks (TTFT, ITL, throughput, cost) |
 | `docs/` | Architecture, design decisions, security notes |
