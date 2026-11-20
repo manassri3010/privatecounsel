@@ -3,58 +3,9 @@
 Each test runs in its own temporary schema, dropped afterwards, so real data is never touched.
 """
 
-import hashlib
-import os
-import uuid
-
-import numpy as np
-import psycopg
-import pymupdf
-import pytest
-
+from fakes import FakeEmbedder, make_pdf
 from ingestion import db, ingest
 from ingestion.parse import Page
-
-
-class FakeEmbedder:
-    """Deterministic stand-in for BGE: one token per word, and a fixed unit vector per text."""
-
-    name = "fake-model@1"
-
-    def count_tokens(self, text):
-        return len(text.split())
-
-    def vector(self, text):
-        seed = int.from_bytes(hashlib.sha256(text.encode()).digest()[:4], "little")
-        v = np.random.default_rng(seed).standard_normal(768)
-        return v / np.linalg.norm(v)
-
-    def embed_passages(self, passages):
-        return np.array([self.vector(p) for p in passages])
-
-
-@pytest.fixture
-def conn():
-    try:
-        conn = db.connect(os.environ.get("TEST_DATABASE_URL"))
-    except psycopg.OperationalError as e:
-        pytest.skip(f"PostgreSQL not reachable: {e}")
-    schema = f"pytest_{uuid.uuid4().hex[:8]}"
-    conn.execute(f"CREATE SCHEMA {schema}")
-    conn.execute(f"SET search_path TO {schema}, public")  # public holds the vector type
-    db.apply_schema(conn)
-    yield conn
-    conn.execute(f"DROP SCHEMA {schema} CASCADE")
-    conn.close()
-
-
-def make_pdf(path, pages):
-    with pymupdf.open() as doc:
-        for text in pages:
-            page = doc.new_page()
-            page.insert_htmlbox(page.rect + (72, 72, -72, -72), text.replace("\n", "<br>"))  # Unicode font
-        doc.save(path)
-    return path
 
 
 ACT_PAGES = [
