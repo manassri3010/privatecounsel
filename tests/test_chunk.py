@@ -20,9 +20,10 @@ def test_chunk_spanning_a_page_break_records_both_pages():
 
     chunks = chunk_pages(pages, max_tokens=1000, count_tokens=words)
 
-    [chunk] = chunks
-    assert (chunk.page_start, chunk.page_end) == (1, 3)
-    assert chunk.heading == "CHAPTER II > 10. What agreements are contracts."
+    assert [(c.heading, c.page_start, c.page_end) for c in chunks] == [
+        ("CHAPTER II > 10. What agreements are contracts.", 1, 2),
+        ("CHAPTER II > 11. Who are competent to contract.", 2, 3),
+    ]
 
 
 def test_long_section_is_split_with_correct_pages_and_no_text_lost():
@@ -51,13 +52,35 @@ def test_split_prefers_the_end_of_a_sentence():
     assert chunks[0].text.endswith("filed in time.")  # not mid-sentence after "question of"
 
 
-def test_short_sections_are_merged_but_chunks_stay_under_the_limit():
-    pages = [page(1, *[f"{n}. Section {n} title.—Short body text." for n in range(1, 13)])]  # 6 words each
+def test_short_judgment_parts_are_merged_but_chunks_stay_under_the_limit():
+    parts = ["CASE DETAILS", "Party v. Party", "HEADNOTES", "Issue for consideration here.",
+             "LIST OF ACTS", "Code of Civil Procedure, 1908.", "LIST OF KEYWORDS", "Ex parte decree."]
 
-    chunks = chunk_pages(pages, max_tokens=20, count_tokens=words)
+    chunks = chunk_pages([page(1, *parts)], max_tokens=10, count_tokens=words)
 
-    assert [c.text.count("\n") + 1 for c in chunks] == [3, 3, 3, 3]
-    assert chunks[1].heading == "4. Section 4 title."
+    assert [c.text.splitlines() for c in chunks] == [parts[:4], parts[4:6], parts[6:]]  # 10, 8 and 6 tokens
+    assert [c.heading for c in chunks] == ["CASE DETAILS", "LIST OF ACTS", "LIST OF KEYWORDS"]
+
+
+def test_each_act_section_gets_its_own_chunk_however_short():
+    pages = [page(1, "CHAPTER II", *[f"{n}. Section {n} title.—Short body text." for n in range(10, 13)])]
+
+    chunks = chunk_pages(pages, max_tokens=1000, count_tokens=words)
+
+    assert [c.heading for c in chunks] == [f"CHAPTER II > {n}. Section {n} title." for n in range(10, 13)]
+    assert chunks[0].text == "CHAPTER II\n10. Section 10 title.—Short body text."
+
+
+def test_state_amendment_note_stays_in_its_section():
+    lines = [(1, "CHAPTER I"), (1, "7. Acceptance must be absolute.—In order to convert a proposal."),
+             (1, "STATE AMENDMENT"), (1, "Andhra Pradesh.—In section 7, add a proviso."),
+             (1, "8. Acceptance by performing conditions.—Performance is acceptance.")]
+
+    sections = split_sections(lines)
+
+    assert [s.heading for s in sections] == [
+        "CHAPTER I > 7. Acceptance must be absolute.", "CHAPTER I > 8. Acceptance by performing conditions."]
+    assert "STATE AMENDMENT" in [line for _, line in sections[0].lines]
 
 
 def test_act_sections_need_the_dash_so_the_table_of_contents_is_not_split():
@@ -67,18 +90,35 @@ def test_act_sections_need_the_dash_so_the_table_of_contents_is_not_split():
 
     sections = split_sections(lines)
 
-    assert [heading for heading, _ in sections] == [
+    assert [s.heading for s in sections] == [
         "ARRANGEMENT OF SECTIONS", "ARRANGEMENT OF SECTIONS > 10. What agreements are contracts."]
+
+
+def test_act_section_formats_found_in_india_code():
+    lines = [(1, "73.Compensation for loss or damage caused by breach of contract.—When a contract is broken."),
+             (1, "1[16.“Undue influence” defined.—(1) A contract is said to be induced by undue influence."),
+             (1, "2[19A. Power to set aside contract induced by undue influence.—When consent is caused."),
+             (2, "55. The aforesaid decision also holds as under:—"),  # a judgment paragraph, not a section
+             (2, "“The appeal is dismissed.”")]
+
+    sections = split_sections(lines)
+
+    assert [s.heading for s in sections] == [
+        "73. Compensation for loss or damage caused by breach of contract.",
+        "16. “Undue influence” defined.",
+        "19A. Power to set aside contract induced by undue influence.",
+    ]
+    assert len(sections[-1].lines) == 3  # the judgment paragraph stays in the last section's text
 
 
 def test_heading_wrapped_over_two_lines_is_joined():
     lines = [(1, "CHAPTER II"), (1, "OF CONTRACTS, VOIDABLE CONTRACTS AND VOID"), (1, "AGREEMENTS"),
              (1, "Body text of the chapter.")]
 
-    [(heading, body)] = split_sections(lines)
+    [section] = split_sections(lines)
 
-    assert heading == "CHAPTER II OF CONTRACTS, VOIDABLE CONTRACTS AND VOID AGREEMENTS"
-    assert len(body) == 4
+    assert section.heading == "CHAPTER II OF CONTRACTS, VOIDABLE CONTRACTS AND VOID AGREEMENTS"
+    assert len(section.lines) == 4 and not section.numbered
 
 
 def test_running_headers_footers_and_page_numbers_are_removed():

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS documents (
     sha256          text NOT NULL,          -- re-ingesting an unchanged file is skipped
     pages           integer NOT NULL,
     embedding_model text NOT NULL,          -- vectors from different models can't be compared
+    chunking        text NOT NULL DEFAULT '',  -- chunker version and size, e.g. "v2/400 tokens"
     ingested_at     timestamptz NOT NULL DEFAULT now(),
     UNIQUE (matter_id, source_key)
 );
@@ -27,6 +28,9 @@ CREATE TABLE IF NOT EXISTS chunks (
     embedding   vector(768) NOT NULL,       -- bge-base-en-v1.5 (decision 005)
     UNIQUE (document_id, chunk_index)
 );
+
+-- Columns added after the first version, for databases created before them.
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS chunking text NOT NULL DEFAULT '';
 
 -- Approximate nearest-neighbour index for cosine distance (the <=> operator).
 CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw ON chunks USING hnsw (embedding vector_cosine_ops);
