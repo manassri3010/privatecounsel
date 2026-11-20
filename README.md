@@ -71,6 +71,8 @@ python corpus/fetch_corpus.py    # downloads into data/corpus/ (gitignored); re-
 
 The list of documents and their licences lives in `corpus/sources.toml`. The script also makes image-only "scanned" copies of a few documents for OCR testing, and writes `data/corpus/manifest.json` with each file's source URL, licence, SHA-256 checksum and page count.
 
+Embeddings use `BAAI/bge-base-en-v1.5` (decision 005), downloaded from Hugging Face on first use (about 440 MB) and run locally.
+
 ## Repository layout
 
 | Folder | What's inside |

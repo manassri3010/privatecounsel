@@ -49,3 +49,30 @@ Checked on Hugging Face, 18 Nov 2026.
 - **CUDA:** the default image needs NVIDIA driver 580+ (CUDA 13.0). `VLLM_TAG=v0.32.0-cu129` covers older drivers on rented nodes, and the tag is still pinned.
 - **Upgrading:** an upgrade is its own PR, with a re-run of the Phase 1 benchmark to show the difference.
 - **Rejected:** `latest` (results drift without notice); `v0.34.0` (too new to trust for a baseline).
+
+## 005: BGE base v1.5 for embeddings, with chunks of at most 400 tokens
+Measured on a MacBook Air (Apple M-series, 8 GB) with the 9-file test corpus, 20 Nov 2026.
+
+| | bge-small-en-v1.5 | **bge-base-en-v1.5** | bge-m3 |
+| --- | --- | --- | --- |
+| Size | 33M parameters, ~130 MB | 110M parameters, ~440 MB | 568M parameters, ~2.3 GB |
+| Vector size | 384 | 768 | 1024 |
+| Max input | 512 tokens | 512 tokens | 8192 tokens |
+| Licence | MIT | MIT | MIT |
+| Languages | English | English | Multilingual |
+
+- **Model:** `BAAI/bge-base-en-v1.5`, pinned to revision `a5beb1e3` so re-ingesting gives the same vectors. Loaded with sentence-transformers.
+- **Why:**
+  - **Quality vs. cost:** retrieves noticeably better than the small model on public retrieval benchmarks, while staying small enough for a client's CPU-only server. Our own evals in Phase 3 make the final call.
+  - **Speed:** the whole corpus (318 chunks) embeds in 28 s on the Air's GPU (MPS) or 51 s on its CPU, using about 1.2 GB of memory.
+  - **Licence:** MIT, no conditions on commercial use.
+  - **Private:** runs locally; no document text leaves the machine. Once the model is downloaded, `HF_HUB_OFFLINE=1` stops even the version check against Hugging Face.
+- **How it's used:**
+  - Passages are embedded as `title + heading + chunk text`, so a chunk from the middle of a section still carries which act or case and which section it belongs to.
+  - Questions get BGE's recommended prefix `Represent this sentence for searching relevant passages: `; passages don't.
+  - Vectors are normalised to length 1, so cosine similarity is a dot product (pgvector's `<=>` cosine distance works directly).
+- **Chunk size (changes the 500 to 800 tokens in the original plan):** the model reads at most 512 tokens and silently drops the rest. Chunks are therefore at most **400 tokens**, counted with the model's own tokenizer, leaving up to about 100 for the title and heading. On the corpus the longest passage is 463 tokens (limit 510), the median 384. A "4 characters per token" estimate undercounted by up to 44% and would have let 4 of 314 chunks be cut short, so the real tokenizer is used, and `embed_passages` raises an error instead of truncating.
+- **Rejected:**
+  - **bge-small-en-v1.5:** faster, but lower retrieval quality, and speed isn't the bottleneck at this corpus size.
+  - **bge-m3:** longer inputs and multilingual (useful later for Hindi documents), but 5 times larger and slow on an 8 GB laptop. Re-evaluate if clients need regional-language search.
+
