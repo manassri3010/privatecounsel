@@ -1,8 +1,11 @@
-"""Find the chunks closest in meaning to a question, within one matter.
+"""Find the chunks that best answer a question, within one matter: vector + keyword search (decision 006).
 
 Usage: python -m retrieval.search "Can a minor enter into a contract?" [--matter public-corpus] [-k 5]
+                                  [--mode hybrid|vector|keyword]
 
-This is the vector half of the hybrid search in #29; keyword (BM25) search and rank fusion come next.
+Vector search finds passages with the same meaning in other words; keyword search finds exact terms
+("Order IX Rule 13", "section 19A", a party's name) that a vector can rank low. Each produces its top
+CANDIDATES chunks, and reciprocal rank fusion merges the two lists by rank.
 """
 
 import argparse
@@ -12,21 +15,51 @@ from dataclasses import dataclass
 
 from ingestion import db
 
-# relaxed_order: with a matter filter, an HNSW index scan returns its ef_search (default 40) nearest
-# chunks across all matters and only then filters, which can leave fewer than k. pgvector 0.8's
-# iterative scan keeps searching until k matching rows are found; "relaxed" allows slightly
-# out-of-order results, which the outer ORDER BY puts right.
+CANDIDATES = 20  # chunks taken from each search before fusing (and, later, reranking)
+RRF_K = 60  # rank-fusion constant from Cormack et al. (2009); damps the gap between ranks 1, 2, 3...
+MODES = {"hybrid": (1, 1), "vector": (1, 0), "keyword": (0, 1)}  # (vector weight, keyword weight)
+
+# - vector: hnsw.iterative_scan (set per query) keeps the HNSW index scan going until it has enough
+#   chunks of this matter; without it, the scan stops after ef_search (40) chunks from all matters
+#   and can return too few. MATERIALIZED + LIMIT keeps the index in use.
+# - keyword: the question's words are OR-ed ('minor' | 'enter' | 'contract'), so a chunk needn't contain
+#   every word of a natural-language question; ts_rank_cd scores how many appear, how close together,
+#   and whether in the heading (weight A). Normalisation 32 scales scores to 0..1.
+# - fusion: score = sum over both lists of weight / (RRF_K + rank). A chunk near the top of both beats
+#   one at the top of only one. Only ranks are used, so the two searches' different score scales
+#   don't need calibrating.
 SEARCH_SQL = """
-WITH nearest AS MATERIALIZED (
-    SELECT id, document_id, heading, text, page_start, page_end, ocr, embedding <=> %(query)s AS distance
+WITH vector AS MATERIALIZED (
+    SELECT id, embedding <=> %(embedding)s AS distance
     FROM chunks
     WHERE matter_id = %(matter)s
-    ORDER BY embedding <=> %(query)s
-    LIMIT %(k)s
+    ORDER BY embedding <=> %(embedding)s
+    LIMIT %(candidates)s
+),
+vector_ranked AS (
+    SELECT id, distance, row_number() OVER (ORDER BY distance, id) AS rank FROM vector
+),
+keyword_ranked AS (
+    SELECT id, row_number() OVER (ORDER BY ts_rank_cd(tsv, q, 32) DESC, id) AS rank
+    FROM chunks, (SELECT replace(plainto_tsquery('english', %(question)s)::text, '&', '|')::tsquery AS q) AS query
+    WHERE matter_id = %(matter)s AND tsv @@ q
+    ORDER BY rank
+    LIMIT %(candidates)s
+),
+fused AS (
+    SELECT coalesce(v.id, kw.id) AS id, v.rank AS vector_rank, kw.rank AS keyword_rank, v.distance,
+           coalesce(%(vector_weight)s / (%(rrf_k)s + v.rank), 0)
+           + coalesce(%(keyword_weight)s / (%(rrf_k)s + kw.rank), 0) AS score
+    FROM vector_ranked v FULL OUTER JOIN keyword_ranked kw ON kw.id = v.id
 )
-SELECT d.title, d.file_path, n.heading, n.text, n.page_start, n.page_end, n.ocr, 1 - n.distance AS score
-FROM nearest n JOIN documents d ON d.id = n.document_id
-ORDER BY n.distance
+SELECT d.title, d.file_path, c.heading, c.text, c.page_start, c.page_end, c.ocr,
+       f.score, f.vector_rank, f.keyword_rank, 1 - f.distance AS similarity
+FROM fused f
+JOIN chunks c ON c.id = f.id
+JOIN documents d ON d.id = c.document_id
+WHERE f.score > 0
+ORDER BY f.score DESC, f.vector_rank NULLS LAST, f.id
+LIMIT %(k)s
 """
 
 
@@ -39,7 +72,10 @@ class Hit:
     page_start: int
     page_end: int
     ocr: bool
-    score: float  # cosine similarity: 1 means the same direction, 0 unrelated
+    score: float  # fused score; only meaningful for ordering
+    vector_rank: int | None  # position in each search's candidates, None if not among them
+    keyword_rank: int | None
+    similarity: float | None  # cosine similarity to the question, if found by vector search
 
     @property
     def pages(self):
@@ -51,12 +87,20 @@ class Hit:
         return f"{self.file_path}#page={self.page_start}"
 
 
-def search(conn, embedder, question, matter_id, k=5):
-    query = embedder.embed_query(question)
+def search(conn, embedder, question, matter_id, k=5, mode="hybrid"):
+    vector_weight, keyword_weight = MODES[mode]
+    params = {"embedding": embedder.embed_query(question), "question": question, "matter": matter_id,
+              "candidates": max(CANDIDATES, k), "k": k, "rrf_k": RRF_K,
+              "vector_weight": float(vector_weight), "keyword_weight": float(keyword_weight)}
     with conn.transaction():
         conn.execute("SET LOCAL hnsw.iterative_scan = relaxed_order")
-        rows = conn.execute(SEARCH_SQL, {"query": query, "matter": matter_id, "k": k}).fetchall()
+        rows = conn.execute(SEARCH_SQL, params).fetchall()
     return [Hit(*row) for row in rows]
+
+
+def _found_by(hit):
+    parts = [f"vector #{hit.vector_rank}" if hit.vector_rank else "", f"keyword #{hit.keyword_rank}" if hit.keyword_rank else ""]
+    return ", ".join(p for p in parts if p)
 
 
 def main(argv=None):
@@ -64,16 +108,17 @@ def main(argv=None):
     parser.add_argument("question")
     parser.add_argument("--matter", default="public-corpus")
     parser.add_argument("-k", type=int, default=5, help="number of chunks to show")
+    parser.add_argument("--mode", choices=MODES, default="hybrid", help="compare the searches on their own")
     args = parser.parse_args(argv)
 
     from ingestion.embed import Embedder  # loads the model; kept out of module import for tests
 
-    hits = search(db.connect(), Embedder(), args.question, args.matter, args.k)
+    hits = search(db.connect(), Embedder(), args.question, args.matter, args.k, args.mode)
     if not hits:
-        print(f"No chunks in matter '{args.matter}'. Run python -m ingestion.ingest first.")
+        print(f"No chunks found in matter '{args.matter}'. Run python -m ingestion.ingest first.")
         return 1
     for rank, hit in enumerate(hits, 1):
-        print(f"{rank}. [{hit.score:.3f}] {hit.title}, {hit.pages}{'  (OCR)' if hit.ocr else ''}")
+        print(f"{rank}. {hit.title}, {hit.pages}{'  (OCR)' if hit.ocr else ''}   [{_found_by(hit)}]")
         if hit.heading:
             print(f"   {hit.heading}")
         excerpt = " ".join(hit.text.split())
