@@ -76,3 +76,21 @@ Measured on a MacBook Air (Apple M-series, 8 GB) with the 9-file test corpus, 20
   - **bge-small-en-v1.5:** faster, but lower retrieval quality, and speed isn't the bottleneck at this corpus size.
   - **bge-m3:** longer inputs and multilingual (useful later for Hindi documents), but 5 times larger and slow on an 8 GB laptop. Re-evaluate if clients need regional-language search.
 
+## 006: Hybrid search with Postgres full-text search and reciprocal rank fusion
+Measured on the 6-document corpus (382 chunks), 23 Nov 2026.
+
+- **What:** every question runs two searches inside the matter, each taking its top 20 chunks:
+  - **Vector:** pgvector cosine distance on BGE embeddings (decision 005). Finds the same meaning in different words.
+  - **Keyword:** Postgres full-text search. A generated `tsvector` column, with heading words weighted above body words, and a GIN index. The question's words are OR-ed, so a chunk needn't contain every word, and ranked with `ts_rank_cd`. Finds exact terms such as "Order IX Rule 13", "section 19A" or party names, which a vector can rank low.
+  - **Fusion:** reciprocal rank fusion, score = Σ 1 / (60 + rank) over both lists. It uses ranks only, so the two searches' incomparable scores need no calibration. k = 60 is the constant from the original paper (Cormack, Clarke and Büttcher, 2009).
+- **Why built-in Postgres search:**
+  - It's already in the database we use, keeps the matter filter in the same SQL query, and needs no extra service.
+  - The generated column and GIN index stay in sync automatically when chunks are inserted or deleted.
+- **Known limitation, not true BM25:** `ts_rank_cd` has no inverse document frequency, so a word found in most chunks counts as much as a rare one. In the Contract Act, "contract" appears in 136 of 220 chunks. For "Can a minor enter into a contract?", that pushes s.11 from 1st (vector alone) to 4th (hybrid).
+- **Result on 11 test questions (right chunk ranked first):** vector 10, keyword 9, hybrid 10. Hybrid fixed "condonation of delay under Section 5" (2nd → 1st) and lost "minor" (1st → 4th). Every right chunk was within hybrid's top 4. The corpus is small and has one document per topic, which favours vector search; exact terms matter more with many similar judgments in one matter.
+- **How it's used:** hybrid search's job is **recall**, getting the right chunks into the top 20. Ordering them is the reranker's job (#30). The `--mode` flag runs each search alone for comparison.
+- **Rejected:**
+  - **ParadeDB `pg_search` (true BM25 in Postgres):** AGPL-3.0 licence and a different Postgres image; too much licensing risk and operational change for a product we sell and install at clients.
+  - **In-memory BM25 in Python (e.g. `rank_bm25`):** the index would have to be rebuilt per process and kept in sync with the database, and the matter filter would live outside SQL.
+- **Revisit if** Phase 3 evals show the keyword half hurting. The cheapest fix is a per-matter term-frequency table built at ingest, used to drop or down-weight very common words from the keyword query (an IDF approximation).
+

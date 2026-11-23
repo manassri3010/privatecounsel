@@ -83,10 +83,11 @@ python -m ingestion.ingest --kinds scan --matter ocr-test   # the scanned copies
 
 Re-running skips unchanged documents. The storage tests use the same database, each in a temporary schema that is dropped afterwards.
 
-To see which chunks a question retrieves (vector search; keyword search and reranking come next):
+To see which chunks a question retrieves (hybrid vector + keyword search, decision 006; reranking comes next):
 
 ```bash
 python -m retrieval.search "Can the trial court proceed ex parte after the defendant's counsel withdraws?" -k 5
+python -m retrieval.search "Order IX Rule 13" --mode keyword    # or --mode vector, to compare
 ```
 
 ## Repository layout

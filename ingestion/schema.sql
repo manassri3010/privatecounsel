@@ -26,12 +26,21 @@ CREATE TABLE IF NOT EXISTS chunks (
     page_end    integer NOT NULL,
     ocr         boolean NOT NULL,           -- some of the text came from OCR, so may contain errors
     embedding   vector(768) NOT NULL,       -- bge-base-en-v1.5 (decision 005)
+    -- Words for keyword search (decision 006), kept in sync by Postgres. Heading words weigh more.
+    tsv         tsvector GENERATED ALWAYS AS (
+                    setweight(to_tsvector('english', heading), 'A') || setweight(to_tsvector('english', text), 'B')
+                ) STORED,
     UNIQUE (document_id, chunk_index)
 );
 
 -- Columns added after the first version, for databases created before them.
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS chunking text NOT NULL DEFAULT '';
+ALTER TABLE chunks ADD COLUMN IF NOT EXISTS tsv tsvector GENERATED ALWAYS AS (
+    setweight(to_tsvector('english', heading), 'A') || setweight(to_tsvector('english', text), 'B')
+) STORED;
 
 -- Approximate nearest-neighbour index for cosine distance (the <=> operator).
 CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw ON chunks USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX IF NOT EXISTS chunks_matter_id ON chunks (matter_id);
+-- Inverted index for keyword search: finds the chunks containing given words without reading them all.
+CREATE INDEX IF NOT EXISTS chunks_tsv_gin ON chunks USING gin (tsv);
