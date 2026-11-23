@@ -5,8 +5,10 @@ Usage: python -m ingestion.chunk <file.pdf>   (prints a summary of each chunk)
 1. Running headers, footers and page numbers are removed, so they don't pollute every chunk.
 2. The text is split into sections at headings: capitalised lines ("CHAPTER II", "HEADNOTES") and
    numbered act sections ("10. What agreements are contracts.—").
-3. Long sections are split at line boundaries, preferably at the end of a sentence; consecutive
-   short sections are merged, so every chunk is as close to max_tokens as possible without going over.
+3. Long sections are split at line boundaries, preferably at the end of a sentence. Consecutive short
+   unnumbered sections (judgment parts) are merged up to max_tokens. A numbered act section always
+   gets chunks of its own: merged with its neighbours, its vector would be a blend of several
+   provisions, and lawyers cite acts by section anyway.
 Every line remembers its page, so each chunk knows the pages it spans.
 """
 
@@ -14,6 +16,11 @@ import re
 import sys
 from collections import Counter
 from dataclasses import dataclass
+from typing import NamedTuple
+
+# Bump when a change makes the chunker produce different chunks: documents stored with an older
+# version are then re-chunked by the next ingest instead of being skipped as unchanged.
+CHUNKER_VERSION = 3
 
 # Default for quick inspection with approx_tokens. Ingestion uses embed.CHUNK_TOKENS with the
 # embedding model's own tokenizer instead: the estimate can undercount by over 40% (decision 005).
@@ -21,8 +28,14 @@ MAX_TOKENS = 450
 EDGE_LINES = 4  # how far from the top or bottom of a page a running header or footer can be
 MIN_REPEATS = 3  # an edge line seen on this many pages is a running header or footer
 
-# "10. What agreements are contracts.—All agreements ..." (the table of contents has no dash)
-SECTION = re.compile(r"^(\d+[A-Z]{0,3})\.\s+(.{2,150}?)\s*(?:—|\.--)")
+# An act section starts "10. What agreements are contracts.—All agreements ...": number, title ending
+# in a full stop, then a dash. The table of contents lists the same titles without the dash, and a
+# judgment's "55. ... holds as under:—" has no full stop before it. India Code often leaves out the
+# space after the number ("73.Compensation ...") and marks amended sections with a footnote number
+# and a bracket ("1[16.“Undue influence” defined.—").
+SECTION = re.compile(r"^(?:\d*\[\s*)?(\d+[A-Z]{0,3})\.\s*(.{2,150}?)\.\s*(?:—|--)")
+# Capitalised lines that are annotations inside a section, not headings of a new part.
+NOT_HEADINGS = {"STATE AMENDMENT", "STATE AMENDMENTS"}
 
 
 @dataclass(frozen=True)
@@ -71,12 +84,20 @@ def _is_header(shape, headers):
 
 
 def is_caps_heading(line):
+    if " ".join(line.split()) in NOT_HEADINGS:
+        return False
     letters = [c for c in line if c.isalpha()]
     return len(letters) >= 4 and len(line) <= 80 and all(c.isupper() for c in letters)
 
 
+class Section(NamedTuple):
+    heading: str
+    lines: list  # (page, line) pairs
+    numbered: bool  # a numbered act section ("10. ...—"), which is never merged with another
+
+
 def split_sections(lines):
-    """Group (page, line) pairs into (heading, lines) sections."""
+    """Group (page, line) pairs into sections at headings."""
     sections, part, section_title, current = [], "", "", []
     has_body = previous_was_caps = False
     for page, line in lines:
@@ -88,19 +109,19 @@ def split_sections(lines):
             # Start a new section, unless the current one holds only headings so far:
             # "CHAPTER II" followed directly by "10. ...—" is one section.
             if has_body:
-                sections.append((_heading(part, section_title), current))
+                sections.append(Section(_heading(part, section_title), current, bool(section_title)))
                 current, has_body = [], False
             if caps:
                 part, section_title = line, ""
             else:
-                section_title = f"{match.group(1)}. {match.group(2).rstrip('.')}."
+                section_title = f"{match.group(1)}. {match.group(2)}."
                 has_body = True  # an act section's first line also carries its text
         else:
             has_body = True
         previous_was_caps = caps
         current.append((page, line))
     if current:
-        sections.append((_heading(part, section_title), current))
+        sections.append(Section(_heading(part, section_title), current, bool(section_title)))
     return sections
 
 
@@ -132,17 +153,17 @@ def _split_long(lines, max_tokens, count_tokens):
 def chunk_pages(pages, max_tokens=MAX_TOKENS, count_tokens=approx_tokens):
     """Turn parsed pages into chunks of at most max_tokens (a single over-long line is kept whole)."""
     pieces = []
-    for heading, lines in split_sections(strip_running_headers(pages)):
-        for piece in _split_long(lines, max_tokens, count_tokens):
-            pieces.append((heading, piece, sum(count_tokens(text + "\n") for _, text in piece)))
+    for section in split_sections(strip_running_headers(pages)):
+        for piece in _split_long(section.lines, max_tokens, count_tokens):
+            pieces.append((section, piece, sum(count_tokens(text + "\n") for _, text in piece)))
 
-    chunks, heading, current, tokens = [], "", [], 0
-    for piece_heading, piece, piece_tokens in pieces:
-        if current and tokens + piece_tokens > max_tokens:
+    chunks, heading, current, tokens, current_numbered = [], "", [], 0, False
+    for section, piece, piece_tokens in pieces:
+        if current and (tokens + piece_tokens > max_tokens or section.numbered or current_numbered):
             chunks.append(_make_chunk(heading, current))
             current, tokens = [], 0
         if not current:
-            heading = piece_heading
+            heading, current_numbered = section.heading, section.numbered
         current.extend(piece)
         tokens += piece_tokens
     if current:

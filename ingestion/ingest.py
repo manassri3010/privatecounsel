@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 
 from ingestion import db
-from ingestion.chunk import chunk_pages
+from ingestion.chunk import CHUNKER_VERSION, chunk_pages
 from ingestion.embed import CHUNK_TOKENS, Embedder, passage_text
 from ingestion.parse import parse_pdf
 
@@ -23,13 +23,17 @@ DEFAULT_MANIFEST = db.ROOT / "data" / "corpus" / "manifest.json"
 
 
 def ingest_document(conn, embedder, *, matter_id, source_key, title, path):
-    """Store one PDF and its chunks. Returns the number of chunks, or None if it was unchanged."""
+    """Store one PDF and its chunks. Returns the number of chunks, or None if it was unchanged.
+
+    Unchanged means the same file, embedding model and chunking; a change to any of them re-ingests.
+    """
     path = Path(path)
     sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    chunking = f"v{CHUNKER_VERSION}/{CHUNK_TOKENS} tokens"
     stored = conn.execute(
-        "SELECT sha256, embedding_model FROM documents WHERE matter_id = %s AND source_key = %s",
+        "SELECT sha256, embedding_model, chunking FROM documents WHERE matter_id = %s AND source_key = %s",
         (matter_id, source_key)).fetchone()
-    if stored == (sha256, embedder.name):
+    if stored == (sha256, embedder.name, chunking):
         return None
 
     # The slow work (OCR, embedding) happens before the transaction, so it isn't held open for minutes.
@@ -42,9 +46,10 @@ def ingest_document(conn, embedder, *, matter_id, source_key, title, path):
     with conn.transaction():
         conn.execute("DELETE FROM documents WHERE matter_id = %s AND source_key = %s", (matter_id, source_key))
         document_id = conn.execute(
-            """INSERT INTO documents (matter_id, source_key, title, file_path, sha256, pages, embedding_model)
-               VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id""",
-            (matter_id, source_key, title, str(path), sha256, len(pages), embedder.name)).fetchone()[0]
+            """INSERT INTO documents (matter_id, source_key, title, file_path, sha256, pages, embedding_model,
+                                     chunking)
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+            (matter_id, source_key, title, str(path), sha256, len(pages), embedder.name, chunking)).fetchone()[0]
         with conn.cursor() as cur:
             cur.executemany(
                 """INSERT INTO chunks (document_id, matter_id, chunk_index, heading, text, page_start, page_end,
