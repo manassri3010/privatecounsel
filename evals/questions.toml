@@ -1,0 +1,558 @@
+# Evaluation questions (issue #44). The fixed test set every change is measured against.
+#
+# Written from the documents in corpus/sources.toml, not from what retrieval returns, so they don't
+# flatter the current system. Page numbers are 1-based PDF pages. Each source carries a short quote
+# that `python -m evals.check_questions` finds on every listed page.
+#
+# - type: "single" (one source answers it), "multi" (every listed source is needed),
+#   "unanswerable" (nothing in the corpus answers it; the right reply is "not found").
+# - key_facts: phrases a correct answer must contain. Each inner list holds alternative wordings;
+#   any one of them counts. Matching ignores case.
+# - also_acceptable: other passages that also answer the question, for scoring retrieval.
+#
+# Status: drafted from the documents; each entry still needs a human check against the cited page.
+
+# =================================================================================================
+# Single source: the Indian Contract Act, 1872
+# =================================================================================================
+
+[[question]]
+id = "act-proposal"
+type = "single"
+question = "When is a person said to make a proposal under the Indian Contract Act?"
+answer = "Under section 2(a), a person makes a proposal when he signifies to another his willingness to do or to abstain from doing anything, with a view to obtaining the assent of that other to the act or abstinence."
+key_facts = [["willingness"], ["assent"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [10]
+quote = "with a view to obtaining the assent of that other to such act or abstinence, he is said to make a proposal"
+
+[[question]]
+id = "act-minor"
+type = "single"
+question = "Can a minor enter into a valid contract?"
+answer = "No. Section 11 makes competent to contract only a person who has reached the age of majority under the law he is subject to, is of sound mind and is not disqualified by law. A minor has not reached majority, so is not competent to contract."
+key_facts = [["majority"], ["not competent", "incompetent", "cannot contract", "cannot enter", "is not capable"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [13]
+quote = "Every person is competent to contract who is of the age of majority"
+
+[[question]]
+id = "act-unsound-mind"
+type = "single"
+question = "Can someone who is usually of unsound mind but occasionally lucid make a binding contract?"
+answer = "Yes, but only when of sound mind. Section 12 provides that a person who is usually of unsound mind, but occasionally of sound mind, may make a contract when he is of sound mind."
+key_facts = [["when he is of sound mind", "when of sound mind", "while of sound mind", "when they are of sound mind", "during a lucid"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [13]
+quote = "A person who is usually of unsound mind, but occasionally of sound mind, may make a contract when he is of sound mind"
+
+[[question]]
+id = "act-silence-fraud"
+type = "single"
+question = "Is keeping quiet about a fact that would affect the other party's decision to contract a fraud?"
+answer = "Generally no. Under the Explanation to section 17, mere silence about facts likely to affect a person's willingness to contract is not fraud, unless the circumstances make it the duty of the person keeping silence to speak, or the silence is in itself equivalent to speech."
+key_facts = [["not fraud", "is not fraud", "does not amount to fraud", "not amount to fraud"], ["duty", "equivalent to speech"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [14]
+quote = "Mere silence as to facts likely to affect the willingness"
+
+[[question]]
+id = "act-undue-influence-voidable"
+type = "single"
+question = "Can a contract obtained by undue influence be set aside?"
+answer = "Yes. Under section 19A, when consent is caused by undue influence the agreement is voidable at the option of the party whose consent was so caused. The court may set it aside absolutely or, if that party received a benefit, on just terms."
+key_facts = [["voidable"], ["option"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [15]
+quote = "the agreement is a contract voidable at the option of the party whose consent was so caused"
+
+[[question]]
+id = "act-mutual-mistake"
+type = "single"
+question = "What happens to an agreement if both parties were mistaken about a fact essential to it?"
+answer = "The agreement is void (section 20). An erroneous opinion about the value of the subject matter is not a mistake as to a matter of fact."
+key_facts = [["void"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [16]
+quote = "Where both the parties to an agreement are under a mistake as to a matter of fact essential to the agreement, the agreement is void"
+
+[[question]]
+id = "act-restraint-of-trade"
+type = "single"
+question = "Is a clause stopping someone from carrying on a business valid, and is there an exception when a business is sold?"
+answer = "An agreement restraining anyone from exercising a lawful profession, trade or business is void to that extent (section 27). Exception 1: a seller of the goodwill of a business may agree with the buyer not to carry on a similar business within specified local limits, so long as the buyer carries on a like business there, if the limits are reasonable."
+key_facts = [["void"], ["good-will", "goodwill"], ["local limits"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [18]
+quote = "Every agreement by which any one is restrained from exercising a lawful profession, trade or business of any kind, is to that extent void"
+
+[[question]]
+id = "act-uncertainty"
+type = "single"
+question = "A agrees to sell B 'a hundred tons of oil' without saying what kind. Is the agreement enforceable?"
+answer = "No. Agreements whose meaning is not certain or capable of being made certain are void (section 29); the Act's own illustration says this agreement is void for uncertainty because nothing shows what kind of oil was meant."
+key_facts = [["void"], ["uncertain"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [19]
+quote = "There is nothing whatever to show what kind of oil was intended"
+
+[[question]]
+id = "act-wager"
+type = "single"
+question = "Under section 30 of the Contract Act, can someone sue to recover money won on a bet?"
+answer = "No. Agreements by way of wager are void, and no suit can be brought to recover anything alleged to be won on a wager (section 30). There is an exception for certain prizes for horse-racing."
+key_facts = [["void"], ["no suit", "cannot sue", "cannot be brought", "not be brought", "cannot recover", "can not"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [19]
+quote = "Agreements by way of wager are void"
+
+[[question]]
+id = "act-impossibility"
+type = "single"
+question = "What is the effect on a contract when, after it is made, performance becomes impossible?"
+answer = "Under section 56, a contract to do an act which afterwards becomes impossible, or unlawful because of an event the promisor could not prevent, becomes void when the act becomes impossible or unlawful."
+key_facts = [["void"], ["impossible"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [26]
+quote = "becomes void when the act becomes impossible or unlawful"
+
+[[question]]
+id = "act-novation"
+type = "single"
+question = "If the parties agree to replace their contract with a new one, does the original contract still have to be performed?"
+answer = "No. Under section 62, if the parties agree to substitute a new contract, or to rescind or alter it, the original contract need not be performed."
+key_facts = [["need not be performed", "need not", "not required to be performed", "does not have to be performed", "no longer"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [27]
+quote = "the original contract, need not be performed"
+
+[[question]]
+id = "act-indemnity"
+type = "single"
+question = "What is a contract of indemnity?"
+answer = "Under section 124, a contract by which one party promises to save the other from loss caused to him by the conduct of the promisor himself or of any other person."
+key_facts = [["save"], ["loss"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [34]
+quote = "A contract by which one party promises to save the other from loss caused to him by the conduct of the promisor himself"
+
+[[question]]
+id = "act-bailment"
+type = "single"
+question = "What is a bailment, and who are the bailor and bailee?"
+answer = "Under section 148, a bailment is the delivery of goods by one person to another for some purpose, on a contract that they will be returned or otherwise disposed of according to the deliverer's directions when the purpose is accomplished. The person delivering the goods is the bailor; the person receiving them is the bailee."
+key_facts = [["delivery of goods"], ["bailor"], ["bailee"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [39]
+quote = "is the delivery of goods by one person to another for some purpose"
+
+[[question]]
+id = "act-pledge"
+type = "single"
+question = "What is a pledge under the Contract Act?"
+answer = "Under section 172, a pledge is the bailment of goods as security for payment of a debt or performance of a promise. The bailor is called the pawnor and the bailee the pawnee."
+key_facts = [["bailment"], ["security"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [42]
+quote = "The bailment of goods as security for payment of a debt or performance of a promise"
+
+[[question]]
+id = "act-agent"
+type = "single"
+question = "Who is an agent, and who is the principal?"
+answer = "Under section 182, an agent is a person employed to do any act for another, or to represent another in dealings with third persons. The person for whom the act is done, or who is so represented, is the principal."
+key_facts = [["employed"], ["principal"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [43]
+quote = "is a person employed to do any act for another, or to represent another in dealings with third persons"
+
+# =================================================================================================
+# Single source: judgments
+# =================================================================================================
+
+[[question]]
+id = "sc-recount-only-petition"
+type = "single"
+question = "Is a panchayat election petition that only asks for a recount of votes, without seeking a declaration that the election is void, maintainable?"
+answer = "No. In Dharmin Bai Kashyap v. Babli Sahu (2023), the Supreme Court held that the reliefs in an election petition under section 122 must be in consonance with rule 6 of the Chhattisgarh Panchayats election rules (a declaration that the election is void, and optionally that another candidate was duly elected). A petition seeking only a recount was not maintainable."
+key_facts = [["not maintainable"], ["declaration"]]
+[[question.sources]]
+document = "sc-2023-dharmin-bai-kashyap-v-babli-sahu"
+pages = [2, 9]
+quote = "seeking relief of re-counting of votes alone was not maintainable"
+
+[[question]]
+id = "sc-order-xvii-explanation"
+type = "single"
+question = "Can the explanation to Order XVII Rule 2 CPC be used to treat a defendant who led no evidence as present, so that an Order IX Rule 13 application is barred?"
+answer = "No. In Y. P. Lele v. MSEDCL (2023), the Supreme Court held the explanation could be invoked only against a party who had led evidence or substantial evidence. Since the defendant had led no evidence, it could not be invoked against him, and the High Court erred in holding the Order IX Rule 13 application not maintainable."
+key_facts = [["could not be invoked", "cannot be invoked", "could not be applied", "cannot be applied", "does not apply", "not applicable"], ["evidence"]]
+[[question.sources]]
+document = "sc-2023-yp-lele-v-msedcl"
+pages = [1, 8]
+quote = "explanation could not be invoked"
+
+[[question]]
+id = "sc-esi-lab-coverage-date"
+type = "single"
+question = "From when is a pathology laboratory employing 20 or more people covered by the Employees' State Insurance Act in Kerala?"
+answer = "From 6 September 2007. In ESI Corporation v. Endocrinology and Immunology Lab (2023), the Supreme Court held the laboratory was covered from the date of the Kerala Government's notification of 06.09.2007 under section 1(5), which covered medical institutions including pathological laboratories employing 20 or more persons, and not from 2002."
+key_facts = [["06.09.2007", "6.9.2007", "6 september 2007", "september 6, 2007", "06-09-2007", "september 2007"], ["20 or more", "twenty or more"]]
+[[question.sources]]
+document = "sc-2023-esic-v-endocrinology-and-immunology-lab"
+pages = [1, 4, 7, 8]
+quote = "20 or more persons"
+
+[[question]]
+id = "sc-esi-lab-not-factory"
+type = "single"
+question = "Is a pathological laboratory a 'factory' covered by section 1(4) of the ESI Act?"
+answer = "No. In ESI Corporation v. Endocrinology and Immunology Lab (2023), the Supreme Court held that the laboratory does not fall within the definition of a factory, as no manufacturing process is carried on, so it is not covered under section 1(4)."
+key_facts = [["manufacturing process"], ["not fall within", "does not fall", "not a factory", "not be covered", "not covered", "is not a"]]
+[[question.sources]]
+document = "sc-2023-esic-v-endocrinology-and-immunology-lab"
+pages = [2, 5]
+quote = "will not fall within the definition of a"
+
+[[question]]
+id = "sc-counsel-undertaking-contempt"
+type = "single"
+question = "If a lawyer gives the court an undertaking on the client's instructions that property will not be sold, and the client sells it anyway, is that contempt of court?"
+answer = "Yes. In Balwantbhai Somabhai Bhandari v. Hiralal Somabhai Contractor (2023), the Supreme Court held that the undertaking was given to the High Court and its wilful breach attracts the Contempt of Courts Act, 1971 as civil contempt; the contemnors were rightly held guilty and the sales held void."
+key_facts = [["contempt"], ["undertaking"]]
+[[question.sources]]
+document = "sc-2023-balwantbhai-bhandari-v-hiralal-contractor"
+pages = [1]
+quote = "Undertaking was given to the High Court and the breach or disobedience would attract"
+[[question.also_acceptable]]
+document = "sc-2023-balwantbhai-bhandari-v-hiralal-contractor"
+pages = [35, 49, 70]
+quote = "undertaking given by a counsel"
+
+[[question]]
+id = "sc-paid-legal-practitioner-disqualification"
+type = "single"
+question = "Does disqualifying a municipality's paid legal practitioner from standing for election to that municipality violate Articles 14 or 19(1)(g)?"
+answer = "No. In Sakhawat Ali v. State of Orissa (1954), the Supreme Court held that section 16(1)(x) of the Orissa Municipal Act, 1950, which disqualifies a paid legal practitioner on behalf of or against the municipality, does not violate Article 14 or Article 19(1)(g)."
+key_facts = [["not violate", "do not violate", "does not violate", "no violation", "not infringe", "not unconstitutional"]]
+[[question.sources]]
+document = "sc-1954-sakhawat-ali-v-state-of-orissa"
+pages = [1]
+quote = "a paid legal practitioner on behalf of or against the Municipality is disqualified"
+
+[[question]]
+id = "sc-time-essence-specific-performance"
+type = "single"
+question = "Where an agreement to sell makes time essential and the buyer misses the date and then delays suing, will the court order specific performance?"
+answer = "No. In Desh Raj v. Rohtash Singh (2022), the Supreme Court found the agreements made time-bound performance an essential condition, and given the buyer's undue delay in instituting the suit, the relief of specific performance could not be granted."
+key_facts = [["essential", "essence"], ["cannot be granted", "not be granted", "not entitled", "refused", "denied", "would not"]]
+[[question.sources]]
+document = "sc-2022-desh-raj-v-rohtash-singh"
+pages = [1, 9]
+quote = "time-bound performance as an essential condition"
+
+[[question]]
+id = "sc-reciprocal-promise-not-abandonment"
+type = "single"
+question = "Is a contractor who stops work until the employer performs its own reciprocal promises guilty of abandoning the contract?"
+answer = "No. In Shripati Lakhu Mane v. Maharashtra Water Supply and Sewerage Board (2022), the Supreme Court held that a contractor's refusal to continue unless the reciprocal promises are performed by the other party cannot be termed abandonment; the employer, which changed the work without finalising modified rates, made performance difficult."
+key_facts = [["not abandonment", "cannot be termed as abandonment", "not amount to abandonment", "no abandonment", "not be treated as abandonment", "not abandon"], ["reciprocal"]]
+[[question.sources]]
+document = "sc-2022-shripati-lakhu-mane-v-mwssb"
+pages = [1, 2, 10]
+quote = "cannot be termed as abandonment of contract"
+
+[[question]]
+id = "sc-senior-citizen-transfer-condition"
+type = "single"
+question = "When can a senior citizen have a gift or transfer of property declared void under section 23(1) of the Maintenance and Welfare of Parents and Senior Citizens Act?"
+answer = "Only if the transfer was made subject to a condition that the transferee would provide basic amenities and basic physical needs, and the transferee refuses or fails to do so. In Sudesh Chhikara v. Ramti Devi (2022), the Supreme Court held that condition is a sine qua non and must be pleaded and established."
+key_facts = [["condition"], ["basic amenities", "basic physical needs"]]
+[[question.sources]]
+document = "sc-2022-sudesh-chhikara-v-ramti-devi"
+pages = [1, 5, 6, 7]
+quote = "basic amenities and basic physical needs"
+
+[[question]]
+id = "sc-admitted-agreement-to-sell"
+type = "single"
+question = "In a suit for specific performance, if the seller admits executing the agreement to sell and receiving the advance, must the buyer still prove them?"
+answer = "No. In P. Ramasubbamma v. V. Vijayalakshmi (2022), the Supreme Court held that once the vendor admitted executing the agreement and receiving substantial advance consideration, nothing further was required to be proved by the purchaser, and the High Court erred in reversing the decree."
+key_facts = [["admit"], ["nothing further", "no further", "need not", "not required"]]
+[[question.sources]]
+document = "sc-2022-p-ramasubbamma-v-v-vijayalakshmi"
+pages = [2, 9]
+quote = "nothing further was required to be proved"
+
+[[question]]
+id = "sc-specific-performance-third-party"
+type = "single"
+question = "Can a court grant specific performance if performing the contract depends on the defendant getting a third party to enter into an agreement?"
+answer = "No. In Raman v. R. Natarajan (2022), the Supreme Court held a court cannot grant specific performance compelling a person to enter into an agreement with a third party, since that part of the obligation depended on the will of a third party who was not a party to the agreement."
+key_facts = [["third party"], ["cannot", "can not", "not possible"]]
+[[question.sources]]
+document = "sc-2022-raman-v-r-natarajan"
+pages = [1, 2, 7]
+quote = "compelling him to enter into an agreement with a third party"
+
+[[question]]
+id = "sc-limitation-preliminary-issue"
+type = "single"
+question = "Can a trial court decide limitation as a preliminary issue on oral arguments when it depends on disputed facts?"
+answer = "No. In Mongia Realty and Buildwell v. Manik Sethi (2022), the Supreme Court held that where limitation turned on the plaintiff's pleaded case (loans repayable within a year of the last instalment), it had to be proved by evidence and could not be decided purely on oral arguments as a preliminary issue."
+key_facts = [["evidence"], ["oral arguments", "oral argument"]]
+[[question.sources]]
+document = "sc-2022-mongia-realty-v-manik-sethi"
+pages = [1, 2, 6]
+quote = "could not have been decided purely on the basis of oral arguments"
+
+[[question]]
+id = "sc-son-challenges-father-alienation"
+type = "single"
+question = "What limitation period applies when a son governed by Mitakshara law sues to set aside his father's alienation of ancestral property?"
+answer = "Article 109 of the Limitation Act, not Article 58: twelve years from the date the alienee takes possession of the property, as held in K.C. Laxmana v. K.C. Chandrappa Gowda (2022). The special article prevails over the residuary one, and 'alienation' includes a gift."
+key_facts = [["article 109"], ["twelve years", "12 years"], ["possession"]]
+[[question.sources]]
+document = "sc-2022-kc-laxmana-v-kc-chandrappa-gowda"
+pages = [1, 3, 7, 8]
+quote = "twelve years from the date the alienee takes possession"
+
+[[question]]
+id = "sc-arbitration-section-42-court"
+type = "single"
+question = "If a party has already applied under section 9 of the Arbitration Act to a court in one state, can it apply for appointment of an arbitrator under section 11(6) to the High Court of another state?"
+answer = "No. In General Manager, East Coast Railway v. Hindustan Construction Co. (2022), the Supreme Court held that by section 42, once a section 9 application was made at Visakhapatnam, only the High Court with jurisdiction over that court could entertain the section 11(6) application; the Orissa High Court committed a serious error in appointing an arbitrator, and the other side not opposing an appointment does not confer jurisdiction."
+key_facts = [["section 42", "s.42", "s. 42"], ["jurisdiction"]]
+[[question.sources]]
+document = "sc-2022-east-coast-railway-v-hindustan-construction"
+pages = [1, 5]
+quote = "serious error in entertaining"
+
+[[question]]
+id = "sc-arbitration-section-37-scope"
+type = "single"
+question = "In an appeal under section 37 of the Arbitration Act, can the High Court re-examine the merits of the arbitrator's award?"
+answer = "No. In Haryana Tourism v. Kandhari Beverages (2022), the Supreme Court held an award can be set aside under sections 34/37 only on limited grounds, such as being against the public policy of India (fundamental policy of Indian law, the interest of India, justice or morality) or patently illegal; the High Court could not enter into the merits of the claim."
+key_facts = [["public policy"], ["merits"]]
+[[question.sources]]
+document = "sc-2022-haryana-tourism-v-kandhari-beverages"
+pages = [1, 5]
+quote = "public policy of India"
+
+# =================================================================================================
+# Multiple sources: every listed source is needed for a full answer
+# =================================================================================================
+
+[[question]]
+id = "multi-damages-measure"
+type = "multi"
+question = "What compensation can a buyer claim when the seller breaks a contract to sell goods, and how is it measured?"
+answer = "Under section 73, the injured party gets compensation for loss which naturally arose in the usual course of things from the breach, or which the parties knew when contracting was likely to result, but not for remote or indirect loss. In H. J. Baker v. MMTC (2023), the Supreme Court applied section 73: the measure of damages is the market price of the goods on the date of the breach less the contract price."
+key_facts = [["usual course", "naturally arose"], ["market price"], ["contract price"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [29]
+quote = "which naturally arose in the usual course of things from such breach"
+[[question.sources]]
+document = "sc-2023-hj-baker-v-mmtc"
+pages = [1, 8]
+quote = "the market price of goods on the date of the breach, less the contract price"
+
+[[question]]
+id = "multi-earnest-money-forfeiture"
+type = "multi"
+question = "If a contract names a sum payable on breach, must actual loss be proved, and can a seller forfeit earnest money when the buyer defaults?"
+answer = "Under section 74, the injured party gets reasonable compensation not exceeding the named sum, whether or not actual loss is proved. In Desh Raj v. Rohtash Singh (2022), the Supreme Court held that where the contract clearly makes the amount earnest money, the onus of proving it penal lies on the party seeking a refund, and the forfeiture was justified as reasonable compensation under section 74."
+key_facts = [["reasonable compensation"], ["actual", "whether or not"], ["forfeit"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [31]
+quote = "whether or not actual damage or loss is proved to have been caused thereby"
+[[question.sources]]
+document = "sc-2022-desh-raj-v-rohtash-singh"
+pages = [19]
+quote = "the forfeiture was justified and within the confines of reasonable compensation"
+
+[[question]]
+id = "multi-ex-parte-remedies"
+type = "multi"
+question = "Our lawyer withdrew from the case and the court decreed the suit against us ex parte. What should the trial court have done, and if our application under Order IX Rule 13 is dismissed, how do we challenge that?"
+answer = "In Y. P. Lele v. MSEDCL (2023), the Supreme Court held that once counsel withdrew his vakalatnama, the trial court ought to have issued notice to the defendants to engage another counsel instead of proceeding ex parte. In Koushik Housing Society v. Ameena Begum (2023), it held that the dismissal of an Order IX Rule 13 application is challenged by appeal under Order XLIII Rule 1 CPC, not by revision under section 115."
+key_facts = [["notice"], ["another counsel", "new counsel", "engage"], ["order xliii", "order 43"], ["appeal"]]
+[[question.sources]]
+document = "sc-2023-yp-lele-v-msedcl"
+pages = [2, 8]
+quote = "ought to have issued notice to the defendants to engage another counsel"
+[[question.sources]]
+document = "sc-2023-koushik-housing-society-v-ameena-begum"
+pages = [2, 6]
+quote = "revision under Section 115 of the CPC filed in the instant case was not maintainable"
+
+[[question]]
+id = "multi-condonation-of-delay"
+type = "multi"
+question = "Will courts condone a long delay caused by the litigant's own negligence, or by blaming their advocate?"
+answer = "No. In K.B. Lal v. Gyanendra Pratap (2024), the Supreme Court refused to condone a 14-year delay in an Order IX Rule 7 application: 'sufficient cause' is construed liberally, but delay from gross negligence or want of due diligence is not condoned. In Rajneesh Kumar v. Ved Prakash (2024), it refused to condone a 534-day delay blamed on the advocate, because a litigant must be vigilant about their own case."
+key_facts = [["negligen"], ["vigilant"], ["sufficient cause"]]
+[[question.sources]]
+document = "sc-2024-kb-lal-v-gyanendra-pratap"
+pages = [1]
+quote = "14 years delay cannot be condoned"
+[[question.sources]]
+document = "sc-2024-rajneesh-kumar-v-ved-prakash"
+pages = [1, 4]
+quote = "throw the entire blame on the head of the advocate"
+
+[[question]]
+id = "multi-election-petition-affidavit"
+type = "multi"
+question = "Can an election petition alleging corrupt practices be rejected at the outset under Order VII Rule 11 because the affidavit required by section 83(1) is defective?"
+answer = "Not where there is substantial compliance. In Thangjam Arunkumar v. Yumkham Erabot Singh (2023), the Supreme Court held the affidavit under the proviso to section 83(1)(c) is not mandatory and the defect is curable, so substantial compliance suffices. In Kimneo Haokip Hangshing v. Kenn Raikhan (2024), it held an election petition should not be rejected at the very threshold where there is substantial compliance with the provisions."
+key_facts = [["substantial compliance"], ["curable", "not mandatory"]]
+[[question.sources]]
+document = "sc-2023-thangjam-arunkumar-v-yumkham-erabot-singh"
+pages = [1, 10]
+quote = "It is sufficient if there is substantial compliance"
+[[question.sources]]
+document = "sc-2024-kimneo-haokip-hangshing-v-kenn-raikhan"
+pages = [1, 5, 6]
+quote = "at the very threshold"
+
+[[question]]
+id = "multi-undue-influence"
+type = "multi"
+question = "What counts as undue influence under the Contract Act, and when is a senior citizen's transfer of property treated as made by undue influence?"
+answer = "Under section 16, a contract is induced by undue influence where one party is in a position to dominate the will of the other and uses that position to obtain an unfair advantage. Under section 23(1) of the Senior Citizens Act, as explained in Sudesh Chhikara v. Ramti Devi (2022), a transfer made on condition that the transferee provide basic amenities and physical needs is deemed made by fraud, coercion or undue influence if the transferee fails to provide them, and becomes voidable."
+key_facts = [["dominate the will"], ["unfair advantage"], ["basic amenities", "basic physical needs"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [14]
+quote = "is in a position to dominate the will of the other and uses that position to obtain an unfair advantage"
+[[question.sources]]
+document = "sc-2022-sudesh-chhikara-v-ramti-devi"
+pages = [1, 6]
+quote = "deemed to have been made by fraud or coercion or undue influence"
+
+[[question]]
+id = "multi-guarantee-surety"
+type = "multi"
+question = "What is a contract of guarantee, who are its parties, and how far is the surety liable?"
+answer = "Under section 126, a contract of guarantee is a contract to perform the promise, or discharge the liability, of a third person in case of his default; the giver is the surety, the person whose default is guaranteed is the principal debtor, and the person to whom it is given is the creditor. Under section 128, the surety's liability is co-extensive with that of the principal debtor unless the contract provides otherwise."
+key_facts = [["surety"], ["principal debtor"], ["creditor"], ["co-extensive", "coextensive", "co extensive"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [34]
+quote = "is a contract to perform the promise, or discharge the liability, of a third person in case of his default"
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [35]
+quote = "The liability of the surety is co- extensive with that of the principal debtor"
+
+[[question]]
+id = "multi-public-policy-not-contract"
+type = "multi"
+question = "Is an agreement whose object is opposed to public policy a contract?"
+answer = "No. Under section 10, agreements are contracts only if made with a lawful consideration and a lawful object, among other conditions. Under section 23, a consideration or object is unlawful if it is forbidden by law, would defeat the provisions of any law, is fraudulent, involves injury to the person or property of another, or is regarded by the court as immoral or opposed to public policy."
+key_facts = [["lawful object"], ["public policy"], ["not a contract", "is void", "void", "not enforceable", "unenforceable"]]
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [13]
+quote = "All agreements are contracts if they are made by the free consent of parties competent to contract"
+[[question.sources]]
+document = "indian-contract-act-1872"
+pages = [16]
+quote = "The consideration or object of an agreement is lawful, unless"
+
+# =================================================================================================
+# Unanswerable: nothing in the corpus answers these, so the right reply is "not found".
+# Checked by searching every document (23 Nov 2026). Several are near misses on purpose: the corpus
+# discusses the topic (arbitration, delay, specific relief) but not the asked point, which tempts a
+# model to answer from memory.
+# =================================================================================================
+
+[[question]]
+id = "none-bns-murder"
+type = "unanswerable"
+question = "What is the punishment for murder under the Bharatiya Nyaya Sanhita, 2023?"
+answer = "Not in the corpus: no document mentions the Bharatiya Nyaya Sanhita or murder."
+
+[[question]]
+id = "none-arbitral-award-time-limit"
+type = "unanswerable"
+question = "Within what time must an arbitral tribunal make its award under section 29A of the Arbitration and Conciliation Act?"
+answer = "Not in the corpus: the arbitration judgments discuss sections 9, 11, 34, 37 and 42, but nothing mentions section 29A or a time limit for the award."
+
+[[question]]
+id = "none-section-34-limitation"
+type = "unanswerable"
+question = "What is the time limit for filing an application under section 34 of the Arbitration Act to set aside an award?"
+answer = "Not in the corpus: Haryana Tourism discusses the grounds under section 34, but no document states the time limit for applying."
+
+[[question]]
+id = "none-cheque-bounce"
+type = "unanswerable"
+question = "What is the punishment for dishonour of a cheque under section 138 of the Negotiable Instruments Act?"
+answer = "Not in the corpus: section 138 of the Negotiable Instruments Act appears in no document."
+
+[[question]]
+id = "none-anticipatory-bail"
+type = "unanswerable"
+question = "What conditions can a court impose when granting anticipatory bail?"
+answer = "Not in the corpus: no document deals with bail."
+
+[[question]]
+id = "none-divorce-cruelty"
+type = "unanswerable"
+question = "Is cruelty a ground for divorce under the Hindu Marriage Act?"
+answer = "Not in the corpus: no document deals with the Hindu Marriage Act or divorce."
+
+[[question]]
+id = "none-consumer-forum"
+type = "unanswerable"
+question = "Up to what claim value can a consumer complaint be filed before the District Commission under the Consumer Protection Act, 2019?"
+answer = "Not in the corpus: the Consumer Protection Act appears in no document."
+
+[[question]]
+id = "none-gst-registration"
+type = "unanswerable"
+question = "Above what annual turnover must a business register for GST?"
+answer = "Not in the corpus: no document deals with GST."
+
+[[question]]
+id = "none-section-66a"
+type = "unanswerable"
+question = "Is section 66A of the Information Technology Act still valid law?"
+answer = "Not in the corpus: the IT Act is not in the corpus (its download failed, #24) and no judgment mentions section 66A."
+
+[[question]]
+id = "none-unstamped-agreement"
+type = "unanswerable"
+question = "Is an unstamped agreement admissible in evidence under the Indian Stamp Act?"
+answer = "Not in the corpus: no document deals with stamp duty."
+
+[[question]]
+id = "none-rti-time-limit"
+type = "unanswerable"
+question = "How many days does a public authority have to reply to an application under the Right to Information Act?"
+answer = "Not in the corpus: no document deals with the Right to Information Act."
+
+[[question]]
+id = "none-maternity-leave"
+type = "unanswerable"
+question = "How many weeks of paid maternity leave does the Maternity Benefit Act provide?"
+answer = "Not in the corpus: no document deals with maternity benefit."

@@ -99,6 +99,15 @@ python -m retrieval.search "Can the trial court proceed ex parte after the defen
 python -m retrieval.search "Order IX Rule 13" --mode keyword    # or --mode vector, to compare
 ```
 
+### Evaluation questions
+
+`evals/questions.toml` holds 50 questions on the public corpus: 30 answered by one source, 8 needing several, and 12 the corpus can't answer (the right reply is "not found"). Each records the expected answer, the key facts a correct answer must state, and its source pages with a short quote from each.
+
+```bash
+python -m evals.check_questions   # confirms every quote is on the stated page
+python -m evals.review            # writes data/eval_review.html, with links to each cited page, for checking by hand
+```
+
 ## Repository layout
 
 | Folder | What's inside |
