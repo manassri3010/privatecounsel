@@ -73,6 +73,115 @@ kind = "judgment"
 url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=1955/english/1955_1_1004_1011_EN.pdf"
 licence = "sc-judgments"
 
+# --- More judgments for the eval (#43) ----------------------------------------------------------
+# Chosen to resemble documents already above (Contract Act, CPC ex parte, election petitions) and to
+# add specific relief, limitation and arbitration, so a question's right chunk has close competitors.
+
+[[document]]  # Contract Act ss.55 and 74, specific performance
+id = "sc-2022-desh-raj-v-rohtash-singh"
+title = "Desh Raj & Ors. v. Rohtash Singh (2022 INSC 1279)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_18_65_84_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # Contract Act ss.67 and 75
+id = "sc-2022-shripati-lakhu-mane-v-mwssb"
+title = "Shripati Lakhu Mane v. Member Secretary, Maharashtra Water Supply and Sewerage Board & Ors. (2022 INSC 368)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_2_839_849_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # damages for breach of contract in arbitration
+id = "sc-2023-hj-baker-v-mmtc"
+title = "H. J. Baker and Bros. Inc v. The Minerals and Metals Trade Corporation Ltd. (2023 INSC 747)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/english/2023_11_287_296_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # transfer by fraud, coercion or undue influence
+id = "sc-2022-sudesh-chhikara-v-ramti-devi"
+title = "Sudesh Chhikara v. Ramti Devi & Anr. (2022 INSC 1257)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_17_876_882_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # Specific Relief Act s.10
+id = "sc-2022-p-ramasubbamma-v-v-vijayalakshmi"
+title = "P. Ramasubbamma v. V. Vijayalakshmi & Others (2022 INSC 413)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_16_1002_1013_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # Specific Relief Act ss.12 and 13, Limitation Act Art.54
+id = "sc-2022-raman-v-r-natarajan"
+title = "Raman (Dead) by LRs. v. R. Natarajan (2022 INSC 954)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_11_227_235_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # CPC Order IX Rule 13, ex parte decree
+id = "sc-2023-koushik-housing-society-v-ameena-begum"
+title = "The Koushik Mutually Aided Cooperative Housing Society v. Ameena Begum & Another (2023 INSC 1065)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/english/2023_15_841_847_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # CPC Order IX Rule 7, delay
+id = "sc-2024-kb-lal-v-gyanendra-pratap"
+title = "K.B. Lal (Krishna Bahadur Lal) v. Gyanendra Pratap & Ors. (2024 INSC 281)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2024/english/2024_4_616_623_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # condonation of delay, ex parte order
+id = "sc-2024-rajneesh-kumar-v-ved-prakash"
+title = "Rajneesh Kumar & Anr. v. Ved Prakash (2024 INSC 891)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2024/english/2024_11_1466_1471_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # limitation as a preliminary issue
+id = "sc-2022-mongia-realty-v-manik-sethi"
+title = "M/s Mongia Realty and Buildwell Private Limited v. Manik Sethi (2022 INSC 122)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_1_998_1005_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # Limitation Act Arts.58 and 109
+id = "sc-2022-kc-laxmana-v-kc-chandrappa-gowda"
+title = "K.C. Laxmana v. K.C. Chandrappa Gowda & Anr. (2022 INSC 432)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_3_40_50_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # Arbitration Act ss.42 and 11(6)
+id = "sc-2022-east-coast-railway-v-hindustan-construction"
+title = "General Manager, East Coast Railway & Anr. v. Hindustan Construction Co. Ltd. (2022 INSC 743)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_6_785_789_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # Arbitration Act ss.34 and 37
+id = "sc-2022-haryana-tourism-v-kandhari-beverages"
+title = "Haryana Tourism Limited v. M/s Kandhari Beverages Limited (2022 INSC 32)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2022/english/2022_2_316_320_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # election petition, CPC Order VII Rule 11
+id = "sc-2023-thangjam-arunkumar-v-yumkham-erabot-singh"
+title = "Thangjam Arunkumar v. Yumkham Erabot Singh & Ors. (2023 INSC 762)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2023/english/2023_11_392_402_EN.pdf"
+licence = "sc-judgments"
+
+[[document]]  # election petition dismissed at the threshold
+id = "sc-2024-kimneo-haokip-hangshing-v-kenn-raikhan"
+title = "Kimneo Haokip Hangshing v. Kenn Raikhan & Ors. (2024 INSC 689)"
+kind = "judgment"
+url = "https://indian-supreme-court-judgments.s3.ap-south-1.amazonaws.com/data/pdf/year=2024/english/2024_9_354_360_EN.pdf"
+licence = "sc-judgments"
+
 # --- Scanned copies for OCR testing ---------------------------------------------------------------
 # Image-only PDFs made locally from the documents above: each page is rendered to a greyscale image
 # and the text layer is dropped, which is what a law firm's scanner produces. Keeping the original

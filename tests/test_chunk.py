@@ -139,6 +139,17 @@ def test_running_headers_footers_and_page_numbers_are_removed():
     assert "Last body line." in kept
 
 
+def test_margin_letters_and_control_characters_are_removed_and_headers_still_found():
+    words = ["alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel"]
+    body = {n: [f"The {w} line of page {'one two three four'.split()[n - 1]}." for w in words] for n in range(1, 5)}
+    pages = [page(n, *"ABCDEFGH", str(66 + n), "SUPREME COURT REPORTS", "[2022] 18 S.C.R.", "\x02", *body[n])
+             for n in range(1, 5)]
+
+    kept = [line for _, line in strip_running_headers(pages)]
+
+    assert kept == [line for n in range(1, 5) for line in body[n]]
+
+
 def test_empty_pages_give_no_chunks():
     assert chunk_pages([page(1, ""), page(2, "  ")]) == []
 
