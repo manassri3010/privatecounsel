@@ -36,3 +36,22 @@ def make_pdf(path, pages):
             page.insert_htmlbox(page.rect + (72, 72, -72, -72), text.replace("\n", "<br>"))  # Unicode font
         doc.save(path)
     return path
+
+
+def add_document(conn, matter, title, chunks, path="data/corpus/doc.pdf"):
+    """Insert a document and its chunks directly; each chunk is (text, page, vector)."""
+    document_id = conn.execute(
+        """INSERT INTO documents (matter_id, source_key, title, file_path, sha256, pages, embedding_model)
+           VALUES (%s, %s, %s, %s, 'x', 99, 'fake') RETURNING id""", (matter, title, title, path)).fetchone()[0]
+    for i, (text, page, vector) in enumerate(chunks):
+        conn.execute(
+            """INSERT INTO chunks (document_id, matter_id, chunk_index, heading, text, page_start, page_end, ocr,
+                                   embedding) VALUES (%s, %s, %s, 'HEADING', %s, %s, %s, false, %s)""",
+            (document_id, matter, i, text, page, page, vector))
+    return document_id
+
+
+def nearby(vector, noise, seed):
+    """A unit vector close to `vector`: the larger the noise, the further away."""
+    v = vector + noise * np.random.default_rng(seed).standard_normal(768)
+    return v / np.linalg.norm(v)
