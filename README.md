@@ -56,8 +56,17 @@ brew install tesseract      # OCR for scanned PDFs
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 cp .env.example .env        # switch to the "API run directly with uvicorn" lines
-uvicorn app.main:app --app-dir api --port 8080
+python -m uvicorn app.main:app --app-dir api --port 8080   # "python -m" puts ingestion/ and retrieval/ on the path
 ```
+
+Once the corpus is ingested (see below), ask a question within a matter:
+
+```bash
+curl -s localhost:8080/ask -H 'content-type: application/json' \
+  -d '{"question": "Can I claim damages when the other party breaks the contract?", "matter_id": "public-corpus"}'
+```
+
+The answer cites its sources as `[1]`, `[2]`, and `citations` maps each number to the document, section and pages. `found` is false when the matter's documents don't answer the question; `cited` is false when the model answered without citing anything, so the answer can't be checked.
 
 Run the checks CI runs with `ruff check .` and `pytest`.
 

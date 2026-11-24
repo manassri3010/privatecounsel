@@ -52,7 +52,7 @@ fused AS (
            + coalesce(%(keyword_weight)s / (%(rrf_k)s + kw.rank), 0) AS score
     FROM vector_ranked v FULL OUTER JOIN keyword_ranked kw ON kw.id = v.id
 )
-SELECT d.title, d.file_path, c.heading, c.text, c.page_start, c.page_end, c.ocr,
+SELECT d.id, d.title, d.file_path, c.heading, c.text, c.page_start, c.page_end, c.ocr,
        f.score, f.vector_rank, f.keyword_rank, 1 - f.distance AS similarity
 FROM fused f
 JOIN chunks c ON c.id = f.id
@@ -65,6 +65,7 @@ LIMIT %(k)s
 
 @dataclass(frozen=True)
 class Hit:
+    document_id: int
     title: str
     file_path: str
     heading: str
