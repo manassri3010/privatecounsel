@@ -59,7 +59,7 @@ cp .env.example .env        # switch to the "API run directly with uvicorn" line
 python -m uvicorn app.main:app --app-dir api --port 8080   # "python -m" puts ingestion/ and retrieval/ on the path
 ```
 
-Once the corpus is ingested (see below), ask a question within a matter:
+Once the corpus is ingested (see below), open <http://localhost:8080> to ask questions in the browser (citations open the PDF at the cited page), or call the API:
 
 ```bash
 curl -s localhost:8080/ask -H 'content-type: application/json' \
