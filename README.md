@@ -108,6 +108,15 @@ python -m evals.check_questions   # confirms every quote is on the stated page
 python -m evals.review            # writes data/eval_review.html, with links to each cited page, for checking by hand
 ```
 
+To score the system on them (uses the LLM server in `.env`: Ollama locally, vLLM on a GPU):
+
+```bash
+python -m evals.run                    # about 15 minutes with qwen2.5:3b on a MacBook Air
+python -m evals.run --retrieval-only   # seconds: scores search alone, without the model
+```
+
+It prints retrieval (required sources in the top 5 and top 20 chunks), answer correctness (every key fact stated), citation precision and recall, and "not found" honesty, and saves every answer with the settings used to `evals/results/<time>_<model>.json`.
+
 ## Repository layout
 
 | Folder | What's inside |
