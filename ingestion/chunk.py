@@ -20,7 +20,7 @@ from typing import NamedTuple
 
 # Bump when a change makes the chunker produce different chunks: documents stored with an older
 # version are then re-chunked by the next ingest instead of being skipped as unchanged.
-CHUNKER_VERSION = 3
+CHUNKER_VERSION = 4
 
 # Default for quick inspection with approx_tokens. Ingestion uses embed.CHUNK_TOKENS with the
 # embedding model's own tokenizer instead: the estimate can undercount by over 40% (decision 005).
@@ -34,6 +34,11 @@ MIN_REPEATS = 3  # an edge line seen on this many pages is a running header or f
 # space after the number ("73.Compensation ...") and marks amended sections with a footnote number
 # and a bracket ("1[16.“Undue influence” defined.—").
 SECTION = re.compile(r"^(?:\d*\[\s*)?(\d+[A-Z]{0,3})\.\s*(.{2,150}?)\.\s*(?:—|--)")
+# Supreme Court Reports print the letters A to H down the margin so a passage can be cited as "p. 70 C".
+# They come out as one-letter lines and would push the running header out of reach of EDGE_LINES.
+MARGIN_LETTER = re.compile(r"^[A-H]$")
+# Invisible control characters some PDFs' text layers contain (e.g. \x02); tabs and newlines are kept.
+CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
 # Capitalised lines that are annotations inside a section, not headings of a new part.
 NOT_HEADINGS = {"STATE AMENDMENT", "STATE AMENDMENTS"}
 
@@ -59,9 +64,12 @@ def _shape(line):
 
 
 def strip_running_headers(pages):
-    """Return (page number, line) pairs without page numbers and repeated headers and footers."""
-    page_lines = [(page.number, [line.strip() for line in page.text.splitlines() if line.strip()])
-                  for page in pages]
+    """Return (page number, line) pairs without control characters, page numbers, margin letters and
+    repeated headers and footers."""
+    page_lines = []
+    for page in pages:
+        lines = (CONTROL.sub("", line).strip() for line in page.text.splitlines())
+        page_lines.append((page.number, [line for line in lines if line and not MARGIN_LETTER.match(line)]))
     repeats = Counter()
     for _, lines in page_lines:
         repeats.update({_shape(line) for line in lines[:EDGE_LINES] + lines[-EDGE_LINES:]})
